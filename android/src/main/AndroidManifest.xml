@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.hodoan.barcode_scan_custom">
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application>
+        <activity android:name=".BarcodeScannerActivity" />
+    </application>
+</manifest>
