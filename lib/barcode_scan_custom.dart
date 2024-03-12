@@ -3,6 +3,8 @@ import 'model/model.dart';
 
 export 'gen/protos/protos.pb.dart' show BarcodeFormat, ResultType;
 export 'model/model.dart';
+export 'widgets/camera_widget/camera_widget.dart';
+export 'widgets/camera_widget/camera_controller.dart';
 
 class BarcodeScanCustom {
   BarcodeScanCustom._();
