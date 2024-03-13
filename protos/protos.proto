@@ -5,17 +5,6 @@
 syntax = "proto3";
 option java_package = "com.hodoan.barcode_scan_custom";
 
-// protos/android_configuration.proto
-message AndroidConfiguration {
-    // You can optionally set aspect ratio tolerance level
-    // that is used in calculating the optimal Camera preview size.
-    // On several Huawei devices you need to set this to 0.5.
-    // This parameter is only supported on Android devices.
-    double aspectTolerance = 1;
-    // Set to true to enable auto focus
-    // This parameter is only supported on Android devices.
-    bool useAutoFocus = 2;
-}
 // protos/barcode_format.proto
 enum BarcodeFormat {
     unknown = 0;
@@ -30,19 +19,13 @@ enum BarcodeFormat {
     interleaved2of5 = 9;
     upce = 10;
     pdf417 = 11;
+    // only settings
+    all = 12;
 }
 // protos/configuration.proto
-message Configuration {
-    // Strings which are displayed to the user
-    map<string, string> strings = 1;
-    // Restricts the barcode format which should be read
-    repeated BarcodeFormat restrictFormat = 2;
-    // Index of the camera which should used. -1 uses the default camera
-    int32 useCamera = 3;
-    // Android specific configuration
-    AndroidConfiguration android = 4;
-    // Set to true to automatically enable flash on camera start
-    bool autoEnableFlash = 5;
+message FlutterConfiguration {
+    repeated BarcodeFormat restrictFormat = 1;
+    bool flashInit = 2;
 }
 
 // protos/scan_result.proto

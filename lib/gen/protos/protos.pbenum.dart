@@ -27,6 +27,7 @@ class BarcodeFormat extends $pb.ProtobufEnum {
   static const BarcodeFormat interleaved2of5 = BarcodeFormat._(9, _omitEnumNames ? '' : 'interleaved2of5');
   static const BarcodeFormat upce = BarcodeFormat._(10, _omitEnumNames ? '' : 'upce');
   static const BarcodeFormat pdf417 = BarcodeFormat._(11, _omitEnumNames ? '' : 'pdf417');
+  static const BarcodeFormat all = BarcodeFormat._(12, _omitEnumNames ? '' : 'all');
 
   static const $core.List<BarcodeFormat> values = <BarcodeFormat> [
     unknown,
@@ -41,6 +42,7 @@ class BarcodeFormat extends $pb.ProtobufEnum {
     interleaved2of5,
     upce,
     pdf417,
+    all,
   ];
 
   static final $core.Map<$core.int, BarcodeFormat> _byValue = $pb.ProtobufEnum.initByValue(values);

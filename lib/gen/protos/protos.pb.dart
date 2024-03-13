@@ -17,114 +17,28 @@ import 'protos.pbenum.dart';
 
 export 'protos.pbenum.dart';
 
-/// protos/android_configuration.proto
-class AndroidConfiguration extends $pb.GeneratedMessage {
-  factory AndroidConfiguration({
-    $core.double? aspectTolerance,
-    $core.bool? useAutoFocus,
-  }) {
-    final $result = create();
-    if (aspectTolerance != null) {
-      $result.aspectTolerance = aspectTolerance;
-    }
-    if (useAutoFocus != null) {
-      $result.useAutoFocus = useAutoFocus;
-    }
-    return $result;
-  }
-  AndroidConfiguration._() : super();
-  factory AndroidConfiguration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AndroidConfiguration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AndroidConfiguration', createEmptyInstance: create)
-    ..a<$core.double>(1, _omitFieldNames ? '' : 'aspectTolerance', $pb.PbFieldType.OD, protoName: 'aspectTolerance')
-    ..aOB(2, _omitFieldNames ? '' : 'useAutoFocus', protoName: 'useAutoFocus')
-    ..hasRequiredFields = false
-  ;
-
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  AndroidConfiguration clone() => AndroidConfiguration()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  AndroidConfiguration copyWith(void Function(AndroidConfiguration) updates) => super.copyWith((message) => updates(message as AndroidConfiguration)) as AndroidConfiguration;
-
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static AndroidConfiguration create() => AndroidConfiguration._();
-  AndroidConfiguration createEmptyInstance() => create();
-  static $pb.PbList<AndroidConfiguration> createRepeated() => $pb.PbList<AndroidConfiguration>();
-  @$core.pragma('dart2js:noInline')
-  static AndroidConfiguration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AndroidConfiguration>(create);
-  static AndroidConfiguration? _defaultInstance;
-
-  /// You can optionally set aspect ratio tolerance level
-  /// that is used in calculating the optimal Camera preview size.
-  /// On several Huawei devices you need to set this to 0.5.
-  /// This parameter is only supported on Android devices.
-  @$pb.TagNumber(1)
-  $core.double get aspectTolerance => $_getN(0);
-  @$pb.TagNumber(1)
-  set aspectTolerance($core.double v) { $_setDouble(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasAspectTolerance() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearAspectTolerance() => clearField(1);
-
-  /// Set to true to enable auto focus
-  /// This parameter is only supported on Android devices.
-  @$pb.TagNumber(2)
-  $core.bool get useAutoFocus => $_getBF(1);
-  @$pb.TagNumber(2)
-  set useAutoFocus($core.bool v) { $_setBool(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasUseAutoFocus() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearUseAutoFocus() => clearField(2);
-}
-
 /// protos/configuration.proto
-class Configuration extends $pb.GeneratedMessage {
-  factory Configuration({
-    $core.Map<$core.String, $core.String>? strings,
+class FlutterConfiguration extends $pb.GeneratedMessage {
+  factory FlutterConfiguration({
     $core.Iterable<BarcodeFormat>? restrictFormat,
-    $core.int? useCamera,
-    AndroidConfiguration? android,
-    $core.bool? autoEnableFlash,
+    $core.bool? flashInit,
   }) {
     final $result = create();
-    if (strings != null) {
-      $result.strings.addAll(strings);
-    }
     if (restrictFormat != null) {
       $result.restrictFormat.addAll(restrictFormat);
     }
-    if (useCamera != null) {
-      $result.useCamera = useCamera;
-    }
-    if (android != null) {
-      $result.android = android;
-    }
-    if (autoEnableFlash != null) {
-      $result.autoEnableFlash = autoEnableFlash;
+    if (flashInit != null) {
+      $result.flashInit = flashInit;
     }
     return $result;
   }
-  Configuration._() : super();
-  factory Configuration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Configuration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  FlutterConfiguration._() : super();
+  factory FlutterConfiguration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FlutterConfiguration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Configuration', createEmptyInstance: create)
-    ..m<$core.String, $core.String>(1, _omitFieldNames ? '' : 'strings', entryClassName: 'Configuration.StringsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OS)
-    ..pc<BarcodeFormat>(2, _omitFieldNames ? '' : 'restrictFormat', $pb.PbFieldType.KE, protoName: 'restrictFormat', valueOf: BarcodeFormat.valueOf, enumValues: BarcodeFormat.values, defaultEnumValue: BarcodeFormat.unknown)
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'useCamera', $pb.PbFieldType.O3, protoName: 'useCamera')
-    ..aOM<AndroidConfiguration>(4, _omitFieldNames ? '' : 'android', subBuilder: AndroidConfiguration.create)
-    ..aOB(5, _omitFieldNames ? '' : 'autoEnableFlash', protoName: 'autoEnableFlash')
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FlutterConfiguration', createEmptyInstance: create)
+    ..pc<BarcodeFormat>(1, _omitFieldNames ? '' : 'restrictFormat', $pb.PbFieldType.KE, protoName: 'restrictFormat', valueOf: BarcodeFormat.valueOf, enumValues: BarcodeFormat.values, defaultEnumValue: BarcodeFormat.unknown)
+    ..aOB(2, _omitFieldNames ? '' : 'flashInit', protoName: 'flashInit')
     ..hasRequiredFields = false
   ;
 
@@ -132,62 +46,34 @@ class Configuration extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  Configuration clone() => Configuration()..mergeFromMessage(this);
+  FlutterConfiguration clone() => FlutterConfiguration()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Configuration copyWith(void Function(Configuration) updates) => super.copyWith((message) => updates(message as Configuration)) as Configuration;
+  FlutterConfiguration copyWith(void Function(FlutterConfiguration) updates) => super.copyWith((message) => updates(message as FlutterConfiguration)) as FlutterConfiguration;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static Configuration create() => Configuration._();
-  Configuration createEmptyInstance() => create();
-  static $pb.PbList<Configuration> createRepeated() => $pb.PbList<Configuration>();
+  static FlutterConfiguration create() => FlutterConfiguration._();
+  FlutterConfiguration createEmptyInstance() => create();
+  static $pb.PbList<FlutterConfiguration> createRepeated() => $pb.PbList<FlutterConfiguration>();
   @$core.pragma('dart2js:noInline')
-  static Configuration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Configuration>(create);
-  static Configuration? _defaultInstance;
+  static FlutterConfiguration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FlutterConfiguration>(create);
+  static FlutterConfiguration? _defaultInstance;
 
-  /// Strings which are displayed to the user
   @$pb.TagNumber(1)
-  $core.Map<$core.String, $core.String> get strings => $_getMap(0);
+  $core.List<BarcodeFormat> get restrictFormat => $_getList(0);
 
-  /// Restricts the barcode format which should be read
   @$pb.TagNumber(2)
-  $core.List<BarcodeFormat> get restrictFormat => $_getList(1);
-
-  /// Index of the camera which should used. -1 uses the default camera
-  @$pb.TagNumber(3)
-  $core.int get useCamera => $_getIZ(2);
-  @$pb.TagNumber(3)
-  set useCamera($core.int v) { $_setSignedInt32(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasUseCamera() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearUseCamera() => clearField(3);
-
-  /// Android specific configuration
-  @$pb.TagNumber(4)
-  AndroidConfiguration get android => $_getN(3);
-  @$pb.TagNumber(4)
-  set android(AndroidConfiguration v) { setField(4, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasAndroid() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearAndroid() => clearField(4);
-  @$pb.TagNumber(4)
-  AndroidConfiguration ensureAndroid() => $_ensure(3);
-
-  /// Set to true to automatically enable flash on camera start
-  @$pb.TagNumber(5)
-  $core.bool get autoEnableFlash => $_getBF(4);
-  @$pb.TagNumber(5)
-  set autoEnableFlash($core.bool v) { $_setBool(4, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasAutoEnableFlash() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearAutoEnableFlash() => clearField(5);
+  $core.bool get flashInit => $_getBF(1);
+  @$pb.TagNumber(2)
+  set flashInit($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasFlashInit() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFlashInit() => clearField(2);
 }
 
 class ScanResult extends $pb.GeneratedMessage {

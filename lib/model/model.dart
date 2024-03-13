@@ -1,6 +1,4 @@
-export 'android_options.dart';
-export 'scan_options.dart';
-export 'scan_result.dart';
+export '../gen/protos/protos.pb.dart';
 
 /// If the user has granted the access to the camera this code is returned.
 const cameraAccessGranted = 'PERMISSION_GRANTED';

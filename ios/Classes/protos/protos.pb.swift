@@ -39,6 +39,9 @@ enum BarcodeFormat: SwiftProtobuf.Enum {
   case interleaved2Of5 // = 9
   case upce // = 10
   case pdf417 // = 11
+
+  /// only settings
+  case all // = 12
   case UNRECOGNIZED(Int)
 
   init() {
@@ -59,6 +62,7 @@ enum BarcodeFormat: SwiftProtobuf.Enum {
     case 9: self = .interleaved2Of5
     case 10: self = .upce
     case 11: self = .pdf417
+    case 12: self = .all
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -77,6 +81,7 @@ enum BarcodeFormat: SwiftProtobuf.Enum {
     case .interleaved2Of5: return 9
     case .upce: return 10
     case .pdf417: return 11
+    case .all: return 12
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -100,6 +105,7 @@ extension BarcodeFormat: CaseIterable {
     .interleaved2Of5,
     .upce,
     .pdf417,
+    .all,
   ]
 }
 
@@ -150,60 +156,19 @@ extension ResultType: CaseIterable {
 
 #endif  // swift(>=4.2)
 
-/// protos/android_configuration.proto
-struct AndroidConfiguration {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// You can optionally set aspect ratio tolerance level
-  /// that is used in calculating the optimal Camera preview size.
-  /// On several Huawei devices you need to set this to 0.5.
-  /// This parameter is only supported on Android devices.
-  var aspectTolerance: Double = 0
-
-  /// Set to true to enable auto focus
-  /// This parameter is only supported on Android devices.
-  var useAutoFocus: Bool = false
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 /// protos/configuration.proto
-struct Configuration {
+struct FlutterConfiguration {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// Strings which are displayed to the user
-  var strings: Dictionary<String,String> = [:]
-
-  /// Restricts the barcode format which should be read
   var restrictFormat: [BarcodeFormat] = []
 
-  /// Index of the camera which should used. -1 uses the default camera
-  var useCamera: Int32 = 0
-
-  /// Android specific configuration
-  var android: AndroidConfiguration {
-    get {return _android ?? AndroidConfiguration()}
-    set {_android = newValue}
-  }
-  /// Returns true if `android` has been explicitly set.
-  var hasAndroid: Bool {return self._android != nil}
-  /// Clears the value of `android`. Subsequent reads from it will return its default value.
-  mutating func clearAndroid() {self._android = nil}
-
-  /// Set to true to automatically enable flash on camera start
-  var autoEnableFlash: Bool = false
+  var flashInit: Bool = false
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
-
-  fileprivate var _android: AndroidConfiguration? = nil
 }
 
 struct ScanResult {
@@ -232,8 +197,7 @@ struct ScanResult {
 #if swift(>=5.5) && canImport(_Concurrency)
 extension BarcodeFormat: @unchecked Sendable {}
 extension ResultType: @unchecked Sendable {}
-extension AndroidConfiguration: @unchecked Sendable {}
-extension Configuration: @unchecked Sendable {}
+extension FlutterConfiguration: @unchecked Sendable {}
 extension ScanResult: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
@@ -253,6 +217,7 @@ extension BarcodeFormat: SwiftProtobuf._ProtoNameProviding {
     9: .same(proto: "interleaved2of5"),
     10: .same(proto: "upce"),
     11: .same(proto: "pdf417"),
+    12: .same(proto: "all"),
   ]
 }
 
@@ -264,11 +229,11 @@ extension ResultType: SwiftProtobuf._ProtoNameProviding {
   ]
 }
 
-extension AndroidConfiguration: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "AndroidConfiguration"
+extension FlutterConfiguration: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = "FlutterConfiguration"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "aspectTolerance"),
-    2: .same(proto: "useAutoFocus"),
+    1: .same(proto: "restrictFormat"),
+    2: .same(proto: "flashInit"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -277,86 +242,26 @@ extension AndroidConfiguration: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularDoubleField(value: &self.aspectTolerance) }()
-      case 2: try { try decoder.decodeSingularBoolField(value: &self.useAutoFocus) }()
+      case 1: try { try decoder.decodeRepeatedEnumField(value: &self.restrictFormat) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.flashInit) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.aspectTolerance != 0 {
-      try visitor.visitSingularDoubleField(value: self.aspectTolerance, fieldNumber: 1)
-    }
-    if self.useAutoFocus != false {
-      try visitor.visitSingularBoolField(value: self.useAutoFocus, fieldNumber: 2)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: AndroidConfiguration, rhs: AndroidConfiguration) -> Bool {
-    if lhs.aspectTolerance != rhs.aspectTolerance {return false}
-    if lhs.useAutoFocus != rhs.useAutoFocus {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Configuration: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Configuration"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "strings"),
-    2: .same(proto: "restrictFormat"),
-    3: .same(proto: "useCamera"),
-    4: .same(proto: "android"),
-    5: .same(proto: "autoEnableFlash"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: &self.strings) }()
-      case 2: try { try decoder.decodeRepeatedEnumField(value: &self.restrictFormat) }()
-      case 3: try { try decoder.decodeSingularInt32Field(value: &self.useCamera) }()
-      case 4: try { try decoder.decodeSingularMessageField(value: &self._android) }()
-      case 5: try { try decoder.decodeSingularBoolField(value: &self.autoEnableFlash) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    if !self.strings.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufString>.self, value: self.strings, fieldNumber: 1)
-    }
     if !self.restrictFormat.isEmpty {
-      try visitor.visitPackedEnumField(value: self.restrictFormat, fieldNumber: 2)
+      try visitor.visitPackedEnumField(value: self.restrictFormat, fieldNumber: 1)
     }
-    if self.useCamera != 0 {
-      try visitor.visitSingularInt32Field(value: self.useCamera, fieldNumber: 3)
-    }
-    try { if let v = self._android {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    } }()
-    if self.autoEnableFlash != false {
-      try visitor.visitSingularBoolField(value: self.autoEnableFlash, fieldNumber: 5)
+    if self.flashInit != false {
+      try visitor.visitSingularBoolField(value: self.flashInit, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Configuration, rhs: Configuration) -> Bool {
-    if lhs.strings != rhs.strings {return false}
+  static func ==(lhs: FlutterConfiguration, rhs: FlutterConfiguration) -> Bool {
     if lhs.restrictFormat != rhs.restrictFormat {return false}
-    if lhs.useCamera != rhs.useCamera {return false}
-    if lhs._android != rhs._android {return false}
-    if lhs.autoEnableFlash != rhs.autoEnableFlash {return false}
+    if lhs.flashInit != rhs.flashInit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

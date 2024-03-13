@@ -1,7 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'barcode_scan_custom_method_channel.dart';
-import 'model/model.dart';
 
 abstract class BarcodeScanCustomPlatform extends PlatformInterface {
   /// Constructs a BarcodeScanCustomPlatform.
@@ -16,9 +15,8 @@ abstract class BarcodeScanCustomPlatform extends PlatformInterface {
   /// Defaults to [MethodChannelBarcodeScanCustom].
   static BarcodeScanCustomPlatform get instance => _instance;
 
-  Future<int> get numberOfCameras {
-    throw UnimplementedError('numberOfCameras() has not been implemented.');
-  }
+  Future<bool> get cameraPermission =>
+      throw UnimplementedError('cameraPermission has not been implemented.');
 
   /// Platform-specific implementations should set this with their own
   /// platform-specific class that extends [BarcodeScanCustomPlatform] when
@@ -28,13 +26,7 @@ abstract class BarcodeScanCustomPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
-
-  Future<ScanResult> scan({
-    ScanOptions options = const ScanOptions(),
-  }) {
-    throw UnimplementedError('scan() has not been implemented.');
+  Future<bool> requestPermission() {
+    throw UnimplementedError('requestPermission() has not been implemented.');
   }
 }

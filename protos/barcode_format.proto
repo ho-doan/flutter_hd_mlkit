@@ -15,4 +15,6 @@ enum BarcodeFormat {
     interleaved2of5 = 9;
     upce = 10;
     pdf417 = 11;
+    // only settings
+    all = 12;
 }

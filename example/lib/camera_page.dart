@@ -9,6 +9,7 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage> {
+  CameraController? controller;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +17,7 @@ class _CameraPageState extends State<CameraPage> {
         title: const Text('Camera Page'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: controller?.flash,
             icon: const Icon(Icons.flash_on),
           ),
           TextButton(
@@ -25,7 +26,35 @@ class _CameraPageState extends State<CameraPage> {
           ),
         ],
       ),
-      body: CameraWidget(),
+      body: Column(
+        children: [
+          Expanded(
+            child: CameraWidget(
+              // flashInit: true,
+              created: (c) => setState(() => controller = c),
+            ),
+          ),
+          if (controller != null)
+            ValueListenableBuilder(
+              valueListenable: controller!.barcodeLst,
+              builder: (_, values, __) {
+                return SizedBox(
+                  height: 50,
+                  child: ListView.builder(
+                    itemBuilder: (_, i) {
+                      final item = values[i];
+                      final text = 'format: ${item.format}, formatNote:'
+                          ' ${item.formatNote}, rawContent: '
+                          '${item.rawContent}, type: ${item.type},';
+                      return Text(text);
+                    },
+                    itemCount: values.length,
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 }
