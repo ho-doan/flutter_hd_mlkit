@@ -83,9 +83,9 @@ class _CameraWidgetState extends State<CameraWidget> {
             child: CircularProgressIndicator(),
           );
         }
-        if (Platform.isAndroid) {
-          return Stack(
-            children: [
+        return Stack(
+          children: [
+            if (Platform.isAndroid)
               AndroidView(
                 viewType: viewType,
                 layoutDirection: TextDirection.ltr,
@@ -100,17 +100,37 @@ class _CameraWidgetState extends State<CameraWidget> {
                     ),
                   );
                 },
-              ),
-              Positioned.fill(
-                  child: _cameraOverlay(
-                aspectRatio: size.width < size.height ? 3 / 2 : 6 / 4,
-                color: Colors.black.withOpacity(.3),
-                padding: size.width < size.height ? 60 : 30,
-              ))
-            ],
-          );
-        }
-        return Container();
+              )
+            else if (Platform.isIOS)
+              Container(
+                color: Colors.red,
+                child: UiKitView(
+                  viewType: viewType,
+                  layoutDirection: TextDirection.ltr,
+                  creationParams: creationParams.writeToBuffer(),
+                  creationParamsCodec: const StandardMessageCodec(),
+                  onPlatformViewCreated: (id) {
+                    widget.created(
+                      CameraController._(
+                        channelFlutter:
+                            MethodChannel('camera_view/flutter_$id'),
+                        channelNative: MethodChannel('camera_view/native_$id'),
+                        flashInit: widget.flashInit,
+                      ),
+                    );
+                  },
+                ),
+              )
+            else
+              Container(),
+            Positioned.fill(
+                child: _cameraOverlay(
+              aspectRatio: size.width < size.height ? 3 / 2 : 6 / 4,
+              color: Colors.black.withOpacity(.3),
+              padding: size.width < size.height ? 60 : 30,
+            ))
+          ],
+        );
       },
     );
   }
