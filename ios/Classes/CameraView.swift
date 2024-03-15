@@ -7,228 +7,51 @@
 
 import Foundation
 import Flutter
-import AVFoundation
-import MLImage
-import MLKitBarcodeScanning
-import MLKitVision
 
 class CameraView:NSObject,FlutterPlatformView{
     
     private var _view: CustomView
     
+    private var channelFlutter: FlutterMethodChannel!
+    private var channelNative: FlutterMethodChannel!
+    
     init(
         frame: CGRect,
         viewIdentifier viewId: Int64,
         arguments args: Any?,
-        binaryMessenger messenger: FlutterBinaryMessenger?
+        binaryMessenger messenger: FlutterBinaryMessenger
     ) {
-        _view = CustomView(frame: frame)
-        super.init()}
+        let config = try? FlutterConfiguration(serializedData: args.parserData())
+        
+        _view = CustomView(frame: frame, config)
+        
+        channelFlutter = FlutterMethodChannel(name: "camera_view/flutter_\(viewId)", binaryMessenger: messenger)
+        channelNative = FlutterMethodChannel(name: "camera_view/native_\(viewId)", binaryMessenger: messenger)
+        
+        super.init()
+        
+        _view.delegate = self
+        channelNative.setMethodCallHandler(handle)
+    }
     
     func view() -> UIView {
         return _view
     }
-}
-
-class CustomView: UIView{
-    var captureSession: AVCaptureSession!
-    var stillImageOutput: AVCapturePhotoOutput!
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer!
     
-    var captureOutput: AVCaptureVideoDataOutput = AVCaptureVideoDataOutput()
-    
-    var currentFrame: CGRect!
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        _configure()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder:coder)
-        _configure()
-    }
-    
-    deinit{
-        captureSession.stopRunning()
-    }
-    
-    override func layoutSubviews() {
-        if currentFrame == nil{
-            currentFrame = self.frame
-            return
+    func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+        case "flash":
+            _view.flash(call.arguments as! Bool)
+            result(nil)
+        default:
+            result(FlutterMethodNotImplemented)
         }
-        if currentFrame == self.frame{
-            return
-        }
-        currentFrame = self.frame
-        updateSubView()
-    }
-    
-    func setCameraOrientation(){
-        if UIDevice.current.orientation.isLandscape{
-            DispatchQueue.main.async {
-                if UIDevice.current.orientation == .landscapeLeft{
-                    self.videoPreviewLayer.connection?.videoOrientation = .landscapeRight
-                }
-                if UIDevice.current.orientation == .landscapeRight{
-                    self.videoPreviewLayer.connection?.videoOrientation = .landscapeLeft
-                }
-            }
-        }
-        
-        if UIDevice.current.orientation.isPortrait{
-            DispatchQueue.main.async {
-                self.videoPreviewLayer.connection?.videoOrientation = .portrait
-            }
-        }
-        self.videoPreviewLayer.frame = self.bounds
-    }
-    
-    func updateSubView(){
-        setCameraOrientation()
-        self.videoPreviewLayer.layoutIfNeeded()
-    }
-    
-    func _configure() {
-        captureSession = AVCaptureSession()
-        captureSession.sessionPreset = .medium
-        
-        guard let backCamera = AVCaptureDevice.default(for: AVMediaType.video)
-        else {
-            print("Unable to access back camera!")
-            return
-        }
-        
-        do {
-            let input = try AVCaptureDeviceInput(device: backCamera)
-            stillImageOutput = AVCapturePhotoOutput()
-            if captureSession.canAddInput(input) && captureSession.canAddOutput(stillImageOutput) {
-                captureSession.addInput(input)
-                captureSession.addOutput(stillImageOutput)
-                setupOutput()
-                setupLivePreview()
-            }
-        }
-        catch let error  {
-            print("Error Unable to initialize back camera:  \(error.localizedDescription)")
-        }
-    }
-    
-    private func setupOutput(){
-        self.captureOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as String):kCVPixelFormatType_32BGRA]
-        if self.captureSession.canAddOutput(self.captureOutput){
-            self.captureOutput.alwaysDiscardsLateVideoFrames = true
-            
-            let outputQueue = DispatchQueue(label: "com.hodoan.barcode_scanner_custom.OutputQueue")
-            self.captureOutput.setSampleBufferDelegate(self, queue: outputQueue)
-            
-            self.captureSession.addOutput(captureOutput)
-        }
-    }
-    
-    private func setupLivePreview(){
-        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        
-        videoPreviewLayer.videoGravity = .resizeAspectFill
-        setCameraOrientation()
-        self.layer.addSublayer(videoPreviewLayer)
-        
-        DispatchQueue.global(qos: .userInitiated).async { //[weak self] in
-            self.captureSession.startRunning()
-            
-            DispatchQueue.main.async {
-                self.videoPreviewLayer.frame = self.bounds
-            }
-        }
-    }
-    
-    func detectOrientation()->UIImage.Orientation{
-        switch UIDevice.current.orientation{
-        case .portrait: return .right
-        case .landscapeLeft:return .up
-        case .landscapeRight:return .down
-        case .portraitUpsideDown: return .left
-        case .unknown, .faceUp,.faceDown:
-            return .up
-        @unknown default:
-            return .up
-        }
-    }
-    
-    private func scanBarcodesOnDevice(in image: VisionImage, width: CGFloat, height: CGFloat) {
-        // Define the options for a barcode detector.
-        let format = MLKitBarcodeScanning.BarcodeFormat.all
-        let barcodeOptions = BarcodeScannerOptions(formats: format)
-
-        // Create a barcode scanner.
-        let barcodeScanner = BarcodeScanner.barcodeScanner(options: barcodeOptions)
-        var barcodes: [Barcode] = []
-        var scanningError: Error?
-        do {
-          barcodes = try barcodeScanner.results(in: image)
-        } catch let error {
-          scanningError = error
-        }
-        DispatchQueue.main.sync {
-          if let scanningError = scanningError {
-            print("Failed to scan barcodes with error: \(scanningError.localizedDescription).")
-            return
-          }
-          guard !barcodes.isEmpty else {
-            return
-          }
-          for barcode in barcodes {
-              print("\(String(describing: barcode.displayValue))")
-          }
-        }
-      }
-}
-
-extension CustomView:AVCaptureVideoDataOutputSampleBufferDelegate{
-    func captureOutput(
-        _ output: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
-    ) {
-        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            print("Failed to get image buffer from sample buffer.")
-            return
-        }
-        
-        let visionImage = VisionImage(buffer: sampleBuffer)
-        
-        let orientation:UIImage.Orientation = detectOrientation()
-        visionImage.orientation = orientation
-        
-        let imageWidth = CGFloat(CVPixelBufferGetWidth(imageBuffer))
-        let imageHeight = CGFloat(CVPixelBufferGetHeight(imageBuffer))
-        
-        scanBarcodesOnDevice(in: visionImage, width: imageWidth, height: imageHeight)
     }
 }
 
-class CameraViewFactory: NSObject, FlutterPlatformViewFactory {
-    private var messenger: FlutterBinaryMessenger
-    
-    init(messenger: FlutterBinaryMessenger) {
-        self.messenger = messenger
-        super.init()
-    }
-    
-    func create(
-        withFrame frame: CGRect,
-        viewIdentifier viewId: Int64,
-        arguments args: Any?
-    ) -> FlutterPlatformView {
-        return CameraView(
-            frame: frame,
-            viewIdentifier: viewId,
-            arguments: args,
-            binaryMessenger: messenger)
-    }
-    
-    public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
-        return FlutterStandardMessageCodec.sharedInstance()
+extension CameraView: CustomViewDelegate{
+    func barcode(_ result: ScanResult) {
+        let data = try? result.serializedData()
+        channelFlutter.invokeMethod("barcode", arguments: data)
     }
 }

@@ -5,41 +5,6 @@ import 'package:barcode_scan_custom/barcode_scan_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CameraController {
-  @visibleForTesting
-  final MethodChannel channelFlutter;
-  @visibleForTesting
-  final MethodChannel channelNative;
-
-  late ValueNotifier<bool> _flash;
-  final ValueNotifier<List<ScanResult>> barcodeLst = ValueNotifier([]);
-
-  CameraController._({
-    required this.channelFlutter,
-    required this.channelNative,
-    bool flashInit = false,
-  }) {
-    channelFlutter.setMethodCallHandler(_handle);
-    _flash = ValueNotifier(flashInit);
-  }
-
-  Future<void> flash() async {
-    _flash.value = !_flash.value;
-    await channelNative.invokeMethod('flash', _flash.value);
-  }
-
-  Future<void> _handle(MethodCall call) async {
-    switch (call.method) {
-      case 'barcode':
-        {
-          final value = ScanResult.fromBuffer(call.arguments);
-          final values = List<ScanResult>.from(barcodeLst.value)..add(value);
-          barcodeLst.value = values;
-        }
-    }
-  }
-}
-
 class CameraWidget extends StatefulWidget {
   const CameraWidget({
     super.key,
@@ -93,7 +58,7 @@ class _CameraWidgetState extends State<CameraWidget> {
                 creationParamsCodec: const StandardMessageCodec(),
                 onPlatformViewCreated: (id) {
                   widget.created(
-                    CameraController._(
+                    CameraController(
                       channelFlutter: MethodChannel('camera_view/flutter_$id'),
                       channelNative: MethodChannel('camera_view/native_$id'),
                       flashInit: widget.flashInit,
@@ -102,33 +67,34 @@ class _CameraWidgetState extends State<CameraWidget> {
                 },
               )
             else if (Platform.isIOS)
-              Container(
-                color: Colors.red,
-                child: UiKitView(
-                  viewType: viewType,
-                  layoutDirection: TextDirection.ltr,
-                  creationParams: creationParams.writeToBuffer(),
-                  creationParamsCodec: const StandardMessageCodec(),
-                  onPlatformViewCreated: (id) {
-                    widget.created(
-                      CameraController._(
-                        channelFlutter:
-                            MethodChannel('camera_view/flutter_$id'),
-                        channelNative: MethodChannel('camera_view/native_$id'),
-                        flashInit: widget.flashInit,
-                      ),
-                    );
-                  },
-                ),
+              UiKitView(
+                viewType: viewType,
+                layoutDirection: TextDirection.ltr,
+                creationParams: creationParams.writeToBuffer(),
+                creationParamsCodec: const StandardMessageCodec(),
+                onPlatformViewCreated: (id) {
+                  widget.created(
+                    CameraController(
+                      channelFlutter: MethodChannel('camera_view/flutter_$id'),
+                      channelNative: MethodChannel('camera_view/native_$id'),
+                      flashInit: widget.flashInit,
+                    ),
+                  );
+                },
               )
             else
-              Container(),
-            Positioned.fill(
-                child: _cameraOverlay(
-              aspectRatio: size.width < size.height ? 3 / 2 : 6 / 4,
-              color: Colors.black.withOpacity(.3),
-              padding: size.width < size.height ? 60 : 30,
-            ))
+              Center(
+                child: Text(
+                  'not support platform ${Platform.operatingSystem}!',
+                ),
+              ),
+            if (Platform.isAndroid || Platform.isIOS)
+              Positioned.fill(
+                  child: _cameraOverlay(
+                aspectRatio: size.width < size.height ? 3 / 2 : 6 / 4,
+                color: Colors.black.withOpacity(.3),
+                padding: size.width < size.height ? 60 : 30,
+              ))
           ],
         );
       },
