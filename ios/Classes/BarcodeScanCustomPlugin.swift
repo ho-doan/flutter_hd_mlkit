@@ -2,7 +2,6 @@ import Flutter
 import UIKit
 import AVFoundation
 
-@available(iOS 13.0, *)
 public class BarcodeScanCustomPlugin: NSObject, FlutterPlugin {
     var sink:FlutterEventSink? = nil
     public static func register(with registrar: FlutterPluginRegistrar) {
