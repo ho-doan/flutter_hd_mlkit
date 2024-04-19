@@ -7,8 +7,6 @@
 
 import Foundation
 import AVFoundation
-import MLKitBarcodeScanning
-import MLKitVision
 
 protocol CustomViewDelegate{
     func barcode(_ result: ScanResult)
@@ -22,7 +20,7 @@ class CustomView: UIView{
     var stillImageOutput: AVCapturePhotoOutput!
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!
     
-    var captureOutput: AVCaptureVideoDataOutput = AVCaptureVideoDataOutput()
+    var outputMeta = AVCaptureMetadataOutput()
     
     var currentFrame: CGRect!
     
@@ -128,14 +126,25 @@ class CustomView: UIView{
     }
     
     private func setupOutput(){
-        self.captureOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as String):kCVPixelFormatType_32BGRA]
-        if self.captureSession.canAddOutput(self.captureOutput){
-            self.captureOutput.alwaysDiscardsLateVideoFrames = true
-            
-            let outputQueue = DispatchQueue(label: "com.hodoan.barcode_scanner_custom.OutputQueue")
-            self.captureOutput.setSampleBufferDelegate(self, queue: outputQueue)
-            
-            self.captureSession.addOutput(captureOutput)
+        if self.captureSession.canAddOutput(self.outputMeta){
+            self.captureSession.addOutput(self.outputMeta)
+            self.outputMeta.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+            var format:[AVMetadataObject.ObjectType] = [.aztec,.code39,.code93,.ean8,.ean13,.code128,.dataMatrix,.qr,.interleaved2of5,.upce,.pdf417]
+            if config?.restrictFormat.count == 1{
+                let first = config!.restrictFormat.first
+                if first != .all || first != .unknown {
+                    format = [config!.restrictFormat.first!.abarcode()]
+                }
+            }else {
+                let cnt = config?.restrictFormat.isEmpty ?? true
+                if !cnt{
+                    let check = config?.restrictFormat.contains(.all) ?? true
+                    if !check{
+                        format = config!.restrictFormat.map({$0.abarcode()})
+                    }
+                }
+            }
+            self.outputMeta.metadataObjectTypes = format
         }
     }
     
@@ -174,66 +183,31 @@ class CustomView: UIView{
         }
     }
     
-    private func scanBarcodesOnDevice(in image: VisionImage, width: CGFloat, height: CGFloat) {
-        // Define the options for a barcode detector.
-        var format = MLKitBarcodeScanning.BarcodeFormat.all
-        if config?.restrictFormat.count == 1{
-            format = config!.restrictFormat.first!.mlBarcode()
-        }
-            
-        let barcodeOptions = BarcodeScannerOptions(formats: format)
-        
-        // Create a barcode scanner.
-        let barcodeScanner = BarcodeScanner.barcodeScanner(options: barcodeOptions)
-        var barcodes: [Barcode] = []
-        var scanningError: Error?
-        do {
-            barcodes = try barcodeScanner.results(in: image)
-        } catch let error {
-            scanningError = error
-        }
-        DispatchQueue.main.sync {
-            if let scanningError = scanningError {
-                print("Failed to scan barcodes with error: \(scanningError.localizedDescription).")
-                return
-            }
-            guard !barcodes.isEmpty else {
-                return
-            }
-            for barcode in barcodes {
-                let result = ScanResult.with{
-                    s in
-                    s.rawContent = barcode.rawValue ?? ""
-                    s.formatNote = barcode.displayValue ?? ""
-                    s.type = ResultType.barcode
-                    s.format = barcode.format.cn()
-                }
-                delegate?.barcode(result)
-                print("\(String(describing: barcode.displayValue))")
-            }
-        }
+    func scanResult(result: ScanResult){
+        delegate?.barcode(result)
     }
+    
 }
 
-extension CustomView:AVCaptureVideoDataOutputSampleBufferDelegate{
-    func captureOutput(
-        _ output: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
-    ) {
-        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            print("Failed to get image buffer from sample buffer.")
+extension CustomView:AVCaptureMetadataOutputObjectsDelegate{
+    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        if metadataObjects.count == 0{
+            print("none code")
             return
         }
         
-        let visionImage = VisionImage(buffer: sampleBuffer)
-        
-        let orientation:UIImage.Orientation = detectOrientation()
-        visionImage.orientation = orientation
-        
-        let imageWidth = CGFloat(CVPixelBufferGetWidth(imageBuffer))
-        let imageHeight = CGFloat(CVPixelBufferGetHeight(imageBuffer))
-        
-        scanBarcodesOnDevice(in: visionImage, width: imageWidth, height: imageHeight)
+        let metadataObj = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
+        if metadataObj.type == AVMetadataObject.ObjectType.qr {
+            if metadataObj.stringValue != nil {
+                let result = ScanResult.with{
+                    s in
+                    s.rawContent = metadataObj.stringValue ?? ""
+                    s.formatNote = metadataObj.accessibilityValue ?? ""
+                    s.type = ResultType.barcode
+                    s.format = metadataObj.type.cn()
+                }
+                scanResult(result: result)
+            }
+        }
     }
 }

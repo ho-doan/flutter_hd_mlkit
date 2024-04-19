@@ -16,8 +16,6 @@ A new Flutter plugin project.
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'SwiftProtobuf'
-  s.dependency 'GoogleMLKit/BarcodeScanning', '~> 4.0.0'
-  s.dependency 'MLKitVision'
   s.platform = :ios, '11.0'
 
   s.static_framework = true

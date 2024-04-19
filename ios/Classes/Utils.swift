@@ -7,7 +7,7 @@
 
 import Foundation
 import Flutter
-import MLKitBarcodeScanning
+import AVFoundation
 
 extension Any?{
     func parserData()->Data{
@@ -17,10 +17,10 @@ extension Any?{
 }
 
 extension BarcodeFormat{
-    func mlBarcode()->MLKitBarcodeScanning.BarcodeFormat{
+    func abarcode()->AVMetadataObject.ObjectType{
         switch self{
         case .unknown:
-            .all
+            .qr
         case .aztec:
             .aztec
         case .code39:
@@ -28,44 +28,43 @@ extension BarcodeFormat{
         case .code93:
             .code93
         case .ean8:
-            .EAN8
+            .ean8
         case .ean13:
-            .EAN13
+            .ean13
         case .code128:
             .code128
         case .dataMatrix:
             .dataMatrix
         case .qr:
-            .qrCode
+            .qr
         case .interleaved2Of5:
-            .ITF
+            .interleaved2of5
         case .upce:
-            .UPCE
+            .upce
         case .pdf417:
-            .PDF417
+            .pdf417
         case .all:
-            .all
+            .qr
         case .UNRECOGNIZED(_):
-            .all
+            .qr
         }
     }
 }
 
-extension MLKitBarcodeScanning.BarcodeFormat{
+extension AVMetadataObject.ObjectType{
     func cn()->BarcodeFormat{
         switch self{
         case .aztec:return .aztec
         case .code39: return .code39
         case .code93: return .code93
-        case .EAN8: return .ean8
-        case .EAN13: return .ean13
+        case .ean8: return .ean8
+        case .ean13: return .ean13
         case .code128: return .code128
         case .dataMatrix: return .dataMatrix
-        case .qrCode: return .qr
-        case .ITF: return .interleaved2Of5
-        case .UPCA: return .upce
-        case .UPCE: return .upce
-        case .PDF417: return .pdf417
+        case .qr: return .qr
+        case .interleaved2of5: return .interleaved2Of5
+        case .upce: return .upce
+        case .pdf417: return .pdf417
         default:
             return .unknown
         }
