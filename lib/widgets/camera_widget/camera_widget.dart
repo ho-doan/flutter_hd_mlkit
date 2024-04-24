@@ -5,6 +5,19 @@ import 'package:barcode_scan_custom/barcode_scan_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+const List<BarcodeFormat> noQr = [
+  BarcodeFormat.aztec,
+  BarcodeFormat.code128,
+  BarcodeFormat.code39,
+  BarcodeFormat.code93,
+  BarcodeFormat.dataMatrix,
+  BarcodeFormat.ean13,
+  BarcodeFormat.ean8,
+  BarcodeFormat.interleaved2of5,
+  BarcodeFormat.pdf417,
+  BarcodeFormat.upce,
+];
+
 class CameraWidget extends StatefulWidget {
   const CameraWidget({
     super.key,

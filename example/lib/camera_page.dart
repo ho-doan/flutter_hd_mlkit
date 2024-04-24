@@ -30,6 +30,7 @@ class _CameraPageState extends State<CameraPage> {
         children: [
           Expanded(
             child: CameraWidget(
+              formats: noQr,
               // flashInit: true,
               created: (c) => setState(() => controller = c),
             ),
