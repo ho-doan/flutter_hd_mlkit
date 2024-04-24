@@ -132,10 +132,10 @@ class CustomView: UIView{
             var format:[AVMetadataObject.ObjectType] = [.aztec,.code39,.code93,.ean8,.ean13,.code128,.dataMatrix,.qr,.interleaved2of5,.upce,.pdf417]
             if config?.restrictFormat.count == 1{
                 let first = config!.restrictFormat.first
-                if first != .all || first != .unknown {
+                if first != .all && first != .unknown {
                     format = [config!.restrictFormat.first!.abarcode()]
                 }
-            }else {
+            } else {
                 let cnt = config?.restrictFormat.isEmpty ?? true
                 if !cnt{
                     let check = config?.restrictFormat.contains(.all) ?? true
@@ -197,17 +197,15 @@ extension CustomView:AVCaptureMetadataOutputObjectsDelegate{
         }
         
         let metadataObj = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
-        if metadataObj.type == AVMetadataObject.ObjectType.qr {
-            if metadataObj.stringValue != nil {
-                let result = ScanResult.with{
-                    s in
-                    s.rawContent = metadataObj.stringValue ?? ""
-                    s.formatNote = metadataObj.accessibilityValue ?? ""
-                    s.type = ResultType.barcode
-                    s.format = metadataObj.type.cn()
-                }
-                scanResult(result: result)
+        if metadataObj.stringValue != nil {
+            let result = ScanResult.with{
+                s in
+                s.rawContent = metadataObj.stringValue ?? ""
+                s.formatNote = metadataObj.accessibilityValue ?? ""
+                s.type = ResultType.barcode
+                s.format = metadataObj.type.cn()
             }
+            scanResult(result: result)
         }
     }
 }
