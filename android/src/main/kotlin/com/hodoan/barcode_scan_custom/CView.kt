@@ -38,19 +38,18 @@ class CView(
 ) : TextureView(context) {
     private val cameraManager: CameraManager =
         context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-    private val handlerThread: HandlerThread = HandlerThread("preview")
-    private val handle: Handler
+    private var handlerThread: HandlerThread? = null
+    private var handle: Handler? = null
     private var cameraDevice: CameraDevice? = null
     private var cameraCaptureSession: CameraCaptureSession? = null
-    private var imageReader: ImageReader
+    private var imageReader: ImageReader? = null
 
     private var capRed: CaptureRequest.Builder? = null
 
     private val listener: ImageReader.OnImageAvailableListener
 
     init {
-        handlerThread.start()
-        handle = Handler(handlerThread.looper)
+        iniCamera()
 
         listener = ImageReader.OnImageAvailableListener { p0 ->
             val image = p0?.acquireLatestImage()
@@ -61,9 +60,6 @@ class CView(
             barcodeAnalyzer.analyze(image, rotation)
             image?.close()
         }
-
-        imageReader = ImageReader.newInstance(480, 640, ImageFormat.YUV_420_888, 2)
-        imageReader.setOnImageAvailableListener(listener, handle)
 
         surfaceTextureListener = object : SurfaceTextureListener {
             override fun onSurfaceTextureAvailable(p0: SurfaceTexture, p1: Int, p2: Int) {
@@ -88,15 +84,44 @@ class CView(
         }
     }
 
+    fun stopCamera() {
+        handlerThread?.quitSafely()
+        try {
+            handlerThread?.join()
+            handlerThread = null
+            handle = null
+        } catch (e: InterruptedException) {
+            Log.e(CView::class.simpleName, "resumeCamera: ${e.stackTrace}")
+        }
+    }
+
+    fun pauseCamera(){
+        closeCamera()
+        stopCamera()
+    }
+
+    fun iniCamera() {
+        handlerThread = HandlerThread("CameraBackground").also { it.start() }
+        handle = Handler(handlerThread!!.looper)
+    }
+
+    fun resumeCamera(){
+        iniCamera()
+        openCamera()
+    }
+
     fun openCamera() {
         if (surfaceTexture == null) return
         cameraManager.openCamera(cameraManager.cameraIdList[0], object :
             CameraDevice.StateCallback() {
             override fun onOpened(p0: CameraDevice) {
+                imageReader = ImageReader.newInstance(480, 640, ImageFormat.YUV_420_888, 2)
+                imageReader!!.setOnImageAvailableListener(listener, handle)
+
                 cameraDevice = p0
                 capRed = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                 val surface = Surface(surfaceTexture)
-                capRed?.addTarget(imageReader.surface)
+                capRed?.addTarget(imageReader!!.surface)
                 capRed?.addTarget(surface)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -104,10 +129,10 @@ class CView(
                         SessionConfiguration(
                             SessionConfiguration.SESSION_REGULAR,
                             listOf(
-                                OutputConfiguration(imageReader.surface),
+                                OutputConfiguration(imageReader!!.surface),
                                 OutputConfiguration(surface),
                             ),
-                            HandlerExecutor(handlerThread.looper),
+                            HandlerExecutor(handlerThread!!.looper),
                             object : CameraCaptureSession.StateCallback() {
                                 override fun onConfigured(p0: CameraCaptureSession) {
                                     configuredSession(p0)
@@ -120,7 +145,7 @@ class CView(
                 } else {
                     @Suppress("DEPRECATION")
                     cameraDevice?.createCaptureSession(
-                        listOf(imageReader.surface, surface),
+                        listOf(imageReader!!.surface, surface),
                         object : CameraCaptureSession.StateCallback() {
                             override fun onConfigured(p0: CameraCaptureSession) {
                                 configuredSession(p0)
@@ -146,11 +171,13 @@ class CView(
     fun closeCamera() {
         capRed = null
         cameraDevice?.close()
-        imageReader.close()
+        imageReader?.close()
         cameraCaptureSession?.close()
-        handle.removeCallbacksAndMessages(null)
-        handlerThread.quitSafely()
-        handlerThread.join()
+        handle?.removeCallbacksAndMessages(null)
+        handlerThread?.quitSafely()
+        handlerThread?.join()
+        handlerThread = null
+        handle = null
     }
 
     fun flash(flash: Boolean) {

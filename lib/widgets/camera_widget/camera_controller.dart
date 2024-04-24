@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +26,16 @@ class CameraController {
   Future<void> flash() async {
     _flash.value = !_flash.value;
     await channelNative.invokeMethod('flash', _flash.value);
+  }
+
+  Future<void> pauseCamera() async {
+    if (!Platform.isAndroid) return;
+    await channelNative.invokeMethod('pauseCamera');
+  }
+
+  Future<void> resumeCamera() async {
+    if (!Platform.isAndroid) return;
+    await channelNative.invokeMethod('resumeCamera');
   }
 
   Future<void> _handle(MethodCall call) async {

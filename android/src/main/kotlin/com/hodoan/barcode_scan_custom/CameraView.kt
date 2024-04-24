@@ -47,6 +47,14 @@ internal class CameraView(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "flash" -> result.success(cView.flash(call.arguments as Boolean))
+            "pauseCamera" -> {
+                cView.pauseCamera()
+                result.success(null)
+            }
+            "resumeCamera" -> {
+                cView.resumeCamera()
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }

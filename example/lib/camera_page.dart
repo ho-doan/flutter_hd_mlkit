@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:barcode_scan_custom/barcode_scan_custom.dart';
 import 'package:flutter/material.dart';
 
@@ -8,8 +10,7 @@ class CameraPage extends StatefulWidget {
   State<CameraPage> createState() => _CameraPageState();
 }
 
-class _CameraPageState extends State<CameraPage> {
-  CameraController? controller;
+class _CameraPageState extends CameraWidgetWrapper<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,5 +58,17 @@ class _CameraPageState extends State<CameraPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void onPaused() {
+    log('onPaused');
+    super.onPaused();
+  }
+
+  @override
+  void onResumed() {
+    log('onResumed');
+    super.onResumed();
   }
 }
