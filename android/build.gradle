@@ -2,8 +2,8 @@ group 'com.hodoan.barcode_scan_custom'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
-    ext.protobuf_version = '0.8.18'
+    ext.kotlin_version = '1.8.22'
+    ext.protobuf_version = '0.9.4'
     ext.protocVersion = '3.11.0'
     ext.javaliteVersion = '3.11.0'
     repositories {
@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:8.7.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.google.protobuf:protobuf-gradle-plugin:$protobuf_version"
     }
@@ -30,9 +30,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.protobuf'
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace 'com.hodoan.barcode_scan_custom'
-    }
+    namespace 'com.hodoan.barcode_scan_custom'
 
     compileSdk 34
 
